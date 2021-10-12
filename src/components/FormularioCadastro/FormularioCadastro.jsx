@@ -1,65 +1,47 @@
-import React, { useState } from 'react';
-import { TextField, Button, Switch, FormControlLabel, FormGroup } from '@material-ui/core';
+import { Step, StepLabel, Stepper, Typography } from '@material-ui/core';
+import React, { Fragment, useEffect, useState } from 'react';
+import DadosEntrega from './DadosEntrega';
+import DadosPessoais from './DadosPessoais';
+import DadosUsuario from './DadosUsuario';
 
-function FormularioCadastro({aoEnviar, validarCPF}) {
+function FormularioCadastro({ aoEnviar }) {
+    const [etapaAtual, setEtapaAtual] = useState(0);
+    const [dadosColetados, setDadosColegados] = useState({});
+    useEffect( () => {
+        if(etapaAtual === formularios.length -1){
+            aoEnviar(dadosColetados);
+        }
+    })
+    const formularios = [
+        <DadosUsuario aoEnviar={coletarDados} />,
+        <DadosPessoais aoEnviar={coletarDados} />,
+        <DadosEntrega aoEnviar={coletarDados} />,
+        <Typography variant="h5">Obrigado pelo Cadastro!</Typography>
+    ];
 
-    // meus hooks
-    const [nome, setNome] = useState("");
-    const [sobrenome, setSobrenome] = useState("");
-    const [cpf, setCpf] = useState("");
-    const [promocoes, setPromocoes] = useState(true);
-    const [novidades, setNovidades] = useState(true);
-    const [erros, setErros] = useState({cpf:{valido:true, texto:""}})
+    function coletarDados(dados) {
+        
+        setDadosColegados({...dadosColetados , ...dados});
+        Proximo();
+    }
+
+    function Proximo() {
+        setEtapaAtual(etapaAtual + 1);
+    }
 
     return (
-        <form onSubmit={(e) => {
-            e.preventDefault();
-            aoEnviar({nome, sobrenome, cpf, novidades, promocoes})
-        }}>
-            <TextField
-                value={nome}
-                onChange={
-                    (e) => {
-                        setNome(e.target.value)
-                    }}
-                variant="outlined" id="nome" label="Nome" margin="normal" fullWidth />
-            <TextField
-                value={sobrenome}
-                onChange={
-                    (e) => {
-                        setSobrenome(e.target.value)
-                    }} variant="outlined" id="sobrenome" label="Sobrenome" margin="normal" fullWidth />
-            <TextField
-                value={cpf}
-                onChange={
-                    (e) => {
-                        setCpf(e.target.value)
-                    }}
-                onBlur={(e) => {
-                    const ehValido = validarCPF(e.target.value);
-                    setErros({cpf: ehValido})
-                }}
-                variant="outlined" id="cpf" label="CPF" margin="normal" fullWidth error={!erros.cpf.valido} helperText={erros.cpf.texto} />
-
-            <FormGroup>
-                <FormControlLabel checked={promocoes} onChange={(e) => {
-                    setPromocoes(e.target.checked)
-                }} control={<Switch defaultChecked={promocoes} />} label="Promoções" />
-
-            </FormGroup>
-
-            <FormGroup>
-                <FormControlLabel checked={novidades} onChange={(e) => {
-                    setNovidades(e.target.checked)
-                }} control={<Switch defaultChecked={novidades} />} label="Novidades" />
-            </FormGroup>
-
-
-
-            <Button type="submit" variant="contained" color="primary">Cadastrar</Button>
-
-        </form>
+        <Fragment>
+            <Stepper activeStep={etapaAtual}>
+                <Step><StepLabel>Login</StepLabel></Step>
+                <Step><StepLabel>Pessoal</StepLabel></Step>
+                <Step><StepLabel>Entrega</StepLabel></Step>
+                <Step><StepLabel>Finalização</StepLabel></Step>
+            </Stepper>
+            {formularios[etapaAtual]}
+        </Fragment>
     )
 }
+//
+//
 
 export default FormularioCadastro;
